@@ -7,7 +7,7 @@ table ReqOrderInsertField{
     price_type: uint8;
     price: float64;
     volume: float64;
-    ext_order_ref: string;
+    ext_order_ref: uint64;
 }
 
 table OrderField{
@@ -20,10 +20,10 @@ table OrderField{
     price: float64;
     volume: float64;
     trade_volume: float64;
-    ext_order_ref: string;
     status: uint8;
-    err_msg: string;
     withdraw_volume: float64;
+    ext_order_ref: uint64;
+    err_msg: string;
 }
 
 table ReqOrderActionField{
@@ -34,7 +34,7 @@ table ReqOrderActionField{
 table RspOrderActionField{
     orig_session_id: uint32;
     orig_order_ref: uint32;
-    orig_ext_order_ref: string;
+    orig_ext_order_ref: uint64;
 }
 
 enum MessageType : uint8 {

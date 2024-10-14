@@ -9,7 +9,7 @@
 int main(int argc, char** argv) {
     hv::WebSocketService ws;
     ws.onopen = [](const WebSocketChannelPtr& channel, const HttpRequestPtr& req) {
-        std::cout << std::format("client connect to {}", req->Path().c_str());
+        std::cout << std::format("client connect to {}\n", req->Path().c_str());
     };
     ws.onmessage = [](const WebSocketChannelPtr& channel, const std::string& msg) {
         auto msg_ptr = Messages::GetMessage(msg.data());
@@ -28,7 +28,6 @@ int main(int argc, char** argv) {
                     req_order->price(),
                     req_order->volume(),
                     req_order->volume() * 0.5,
-                    req_order->ext_order_ref()->c_str(),
                     1);
                 auto msg = Messages::CreateMessage(
                     builder,
@@ -38,10 +37,11 @@ int main(int argc, char** argv) {
                 builder.Finish(msg);
                 channel->send(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
                 builder.Clear();
+                break;
             }
             case Messages::MessageType::ReqOrderActionField: {
                 auto cancel_order = msg_ptr->payload_as_ReqOrderActionField();
-                auto canceled_order = Messages::CreateRspOrderActionFieldDirect(
+                auto canceled_order = Messages::CreateRspOrderActionField(
                     builder,
                     cancel_order->session_id(),
                     cancel_order->order_ref());
@@ -53,8 +53,10 @@ int main(int argc, char** argv) {
                 builder.Finish(msg);
                 channel->send(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
                 builder.Clear();
+                break;
             }
             default:
+                std::cout << "not match" << '\n';
                 break;
         }
     };
