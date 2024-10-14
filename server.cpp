@@ -1,6 +1,7 @@
 #include <flatbuffers/flatbuffers.h>
 #include <hv/WebSocketServer.h>
 
+#include <cstdio>
 #include <format>
 
 #include "message_generated.h"
@@ -66,4 +67,5 @@ int main(int argc, char** argv) {
     server.setPort(8888);
     std::cout << std::format("Listening on {}:{}...\n", server.host, server.port);
     server.start();
+    getchar();
 }
