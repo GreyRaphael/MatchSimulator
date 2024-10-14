@@ -1,0 +1,60 @@
+namespace Messages;
+
+table ReqOrderInsertField{
+    market : uint8;
+    symbol: string;
+    side: uint8;
+    price_type: uint8;
+    price: float64;
+    volume: float64;
+    ext_order_ref: string;
+}
+
+table OrderField{
+    session_id: uint32;
+    order_ref: uint32;
+    market : uint8;
+    symbol: string;
+    side: uint8;
+    price_type: uint8;
+    price: float64;
+    volume: float64;
+    trade_volume: float64;
+    ext_order_ref: string;
+    status: uint8;
+    err_msg: string;
+    withdraw_volume: float64;
+}
+
+table ReqOrderActionField{
+    session_id: uint32;
+    order_ref: uint32;
+}
+
+table RspOrderActionField{
+    orig_session_id: uint32;
+    orig_order_ref: uint32;
+    orig_ext_order_ref: string;
+}
+
+enum MessageType : uint8 {
+    None = 0,
+    ReqOrderInsertField,
+    OrderField,
+    ReqOrderActionField,
+    RspOrderActionField
+}
+
+union Payload{
+    ReqOrderInsertField,
+    OrderField,
+    ReqOrderActionField,
+    RspOrderActionField
+}
+
+table Message{
+    type: MessageType;
+    payload: Payload;
+}
+
+root_type Message;
