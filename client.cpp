@@ -1,7 +1,43 @@
 #include <flatbuffers/flatbuffers.h>
 #include <hv/WebSocketClient.h>
 
+#include <cstdint>
+#include <vector>
+
 #include "message_generated.h"
+
+std::vector<uint8_t> serialize_order(flatbuffers::FlatBufferBuilder& builder,
+                                     uint8_t mkt,
+                                     const char* symbol,
+                                     uint8_t side,
+                                     double price,
+                                     double vol) {
+    builder.Clear();
+    auto symbol_offset = builder.CreateString(symbol);  // must above order_builder to avoid nested state
+    Messages::ReqOrderInsertFieldBuilder order_builder(builder);
+    order_builder.add_market(mkt);
+    order_builder.add_symbol(symbol_offset);
+    order_builder.add_side(side);
+    order_builder.add_price(price);
+    order_builder.add_volume(vol);
+    // can use default price_type without pass argument.
+    auto order = order_builder.Finish();
+    auto msg = Messages::CreateMessage(builder, Messages::Payload::ReqOrderInsertField, order.Union());
+    builder.Finish(msg);
+    auto sp = builder.GetBufferSpan();
+    return {sp.begin(), sp.end()};
+}
+
+std::vector<uint8_t> serialize_cancel(flatbuffers::FlatBufferBuilder& builder,
+                                      uint32_t session_id,
+                                      uint32_t order_ref) {
+    builder.Clear();
+    auto cancel = Messages::CreateReqOrderActionField(builder, session_id, order_ref);
+    auto msg = Messages::CreateMessage(builder, Messages::Payload::ReqOrderActionField, cancel.Union());
+    builder.Finish(msg);
+    auto sp = builder.GetBufferSpan();
+    return {sp.begin(), sp.end()};
+}
 
 int main() {
     hv::WebSocketClient client;
@@ -33,34 +69,14 @@ int main() {
     client.open("localhost:8888");
 
     flatbuffers::FlatBufferBuilder builder;
-    auto symbol = builder.CreateString("600000");
-    auto order = Messages::CreateReqOrderInsertField(
-        builder,
-        0,
-        symbol,
-        0,
-        1,
-        12.3,
-        10000);
-    auto msg = Messages::CreateMessage(
-        builder,
-        Messages::Payload::ReqOrderInsertField,
-        order.Union());
-    builder.Finish(msg);
-    client.send(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
-    builder.Clear();
-
-    auto cancel = Messages::CreateReqOrderActionField(
-        builder,
-        100,
-        200);
-    auto cancel_msg = Messages::CreateMessage(
-        builder,
-        Messages::Payload::ReqOrderActionField,
-        cancel.Union());
-    builder.Finish(cancel_msg);
-    client.send(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
-    builder.Clear();
+    for (size_t i = 0; i < 5; ++i) {
+        auto order_data = serialize_order(builder, 1, "600000", 1, 10.1 * i, 100 * i + 100);
+        client.send(reinterpret_cast<const char*>(order_data.data()), order_data.size());
+    }
+    for (size_t i = 0; i < 3; ++i) {
+        auto cancel_data = serialize_cancel(builder, 100, i);
+        client.send(reinterpret_cast<const char*>(cancel_data.data()), cancel_data.size());
+    }
 
     getchar();
 }
