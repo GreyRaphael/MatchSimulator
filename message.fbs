@@ -2,7 +2,7 @@ namespace Messages;
 
 table ReqOrderInsertField{
     market : uint8;
-    symbol: string;
+    symbol: string (required);
     side: uint8;
     price_type: uint8;
     price: float64;
@@ -14,7 +14,7 @@ table OrderField{
     session_id: uint32;
     order_ref: uint32;
     market : uint8;
-    symbol: string;
+    symbol: string (required);
     side: uint8;
     price_type: uint8;
     price: float64;
