@@ -14,8 +14,8 @@ int main(int argc, char** argv) {
     ws.onmessage = [](const WebSocketChannelPtr& channel, const std::string& msg) {
         auto msg_ptr = Messages::GetMessage(msg.data());
         flatbuffers::FlatBufferBuilder builder;
-        switch (msg_ptr->type()) {
-            case Messages::MessageType::ReqOrderInsertField: {
+        switch (msg_ptr->payload_type()) {
+            case Messages::Payload::ReqOrderInsertField: {
                 auto req_order = msg_ptr->payload_as_ReqOrderInsertField();
                 auto matched_order = Messages::CreateOrderFieldDirect(
                     builder,
@@ -31,7 +31,6 @@ int main(int argc, char** argv) {
                     1);
                 auto msg = Messages::CreateMessage(
                     builder,
-                    Messages::MessageType::OrderField,
                     Messages::Payload::OrderField,
                     matched_order.Union());
                 builder.Finish(msg);
@@ -39,7 +38,7 @@ int main(int argc, char** argv) {
                 builder.Clear();
                 break;
             }
-            case Messages::MessageType::ReqOrderActionField: {
+            case Messages::Payload::ReqOrderActionField: {
                 auto cancel_order = msg_ptr->payload_as_ReqOrderActionField();
                 auto canceled_order = Messages::CreateRspOrderActionField(
                     builder,
@@ -47,7 +46,6 @@ int main(int argc, char** argv) {
                     cancel_order->order_ref());
                 auto msg = Messages::CreateMessage(
                     builder,
-                    Messages::MessageType::RspOrderActionField,
                     Messages::Payload::RspOrderActionField,
                     canceled_order.Union());
                 builder.Finish(msg);

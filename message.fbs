@@ -37,14 +37,6 @@ table RspOrderActionField{
     orig_ext_order_ref: uint64;
 }
 
-enum MessageType : uint8 {
-    None = 0,
-    ReqOrderInsertField,
-    OrderField,
-    ReqOrderActionField,
-    RspOrderActionField
-}
-
 union Payload{
     ReqOrderInsertField,
     OrderField,
@@ -53,7 +45,6 @@ union Payload{
 }
 
 table Message{
-    type: MessageType;
     payload: Payload;
 }
 
