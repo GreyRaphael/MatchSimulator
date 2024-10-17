@@ -68,7 +68,7 @@ int main() {
 
     client.open("localhost:8888");
 
-    flatbuffers::FlatBufferBuilder builder;
+    flatbuffers::FlatBufferBuilder builder{1024};
     for (size_t i = 0; i < 5; ++i) {
         auto order_data = serialize_order(builder, 1, "600000", 1, 10.1 * i, 100 * i + 100);
         client.send(reinterpret_cast<const char*>(order_data.data()), order_data.size());

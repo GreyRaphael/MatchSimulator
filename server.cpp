@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     };
     ws.onmessage = [](const WebSocketChannelPtr& channel, const std::string& msg) {
         auto msg_ptr = Messages::GetMessage(msg.data());
-        flatbuffers::FlatBufferBuilder builder;
+        flatbuffers::FlatBufferBuilder builder{1024};
         switch (msg_ptr->payload_type()) {
             case Messages::Payload::ReqOrderInsertField: {
                 auto req_order = msg_ptr->payload_as_ReqOrderInsertField();
